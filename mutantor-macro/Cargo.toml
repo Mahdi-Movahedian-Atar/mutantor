@@ -2,6 +2,12 @@
 name = "mutantor-macro"
 version = "0.1.0"
 edition = "2024"
+license = "Apache-2.0"
+description = "Macros functionality for mutantor"
+repository = "https://github.com/Mahdi-Movahedian-Atar/mutantor"
+readme = "../readme.md"
+keywords = ["mutation-testing", "testing"]
+categories = ["development-tools::testing"]
 
 [lib]
 proc-macro = true
@@ -9,7 +15,7 @@ proc-macro = true
 [dependencies]
 syn = { version = "2", features = ["full", "visit-mut"] }
 quote = "1"
-mutantor-core = {path = "../mutantor-core"}
+mutantor-core = {version = "0.1.0",path = "../mutantor-core"}
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.150"
 reqwest = { version = "0.12", features = ["json"] }
