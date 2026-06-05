@@ -5,7 +5,7 @@ edition = "2024"
 license = "Apache-2.0"
 description = "Core mutation testing engine"
 repository = "https://github.com/Mahdi-Movahedian-Atar/mutantor"
-readme = "../readme.md"
+readme = "readme.md"
 keywords = ["mutation-testing", "testing"]
 categories = ["development-tools::testing"]
 [lib]
