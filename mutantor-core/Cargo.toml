@@ -1,0 +1,11 @@
+[package]
+name = "mutantor-core"
+version = "0.1.0"
+edition = "2024"
+
+
+[dependencies]
+syn = { version = "2", features = ["full", "visit-mut", "visit"] }
+quote = "1"
+proc-macro2 = "1"
+rand = "0.10.1"
