@@ -16,48 +16,48 @@ mod deletion_demo_test {
         if (deletion_demo(a.clone_mutable(), b.clone_mutable())
             == deletion_demo_0(a.clone_mutable(), b.clone_mutable()))
         {
-            println!("mutation {} survived _ {}", 0usize, " COD, LOD,");
+            println!("mutation {} survived _ {}", 0usize, " LOD, COD,");
         } else {
-            println!("mutation {} killed _ {}", 0usize, " COD, LOD,");
+            println!("mutation {} killed _ {}", 0usize, " LOD, COD,");
             score += 1f64;
         }
         if (deletion_demo(a.clone_mutable(), b.clone_mutable())
             == deletion_demo_1(a.clone_mutable(), b.clone_mutable()))
         {
-            println!("mutation {} survived _ {}", 1usize, " LOD, COD,");
+            println!("mutation {} survived _ {}", 1usize, " COD, COD,");
         } else {
-            println!("mutation {} killed _ {}", 1usize, " LOD, COD,");
+            println!("mutation {} killed _ {}", 1usize, " COD, COD,");
             score += 1f64;
         }
         if (deletion_demo(a.clone_mutable(), b.clone_mutable())
             == deletion_demo_2(a.clone_mutable(), b.clone_mutable()))
         {
-            println!("mutation {} survived _ {}", 2usize, " COD, COD,");
+            println!("mutation {} survived _ {}", 2usize, " LOD, LOD,");
         } else {
-            println!("mutation {} killed _ {}", 2usize, " COD, COD,");
+            println!("mutation {} killed _ {}", 2usize, " LOD, LOD,");
             score += 1f64;
         }
         if (deletion_demo(a.clone_mutable(), b.clone_mutable())
             == deletion_demo_3(a.clone_mutable(), b.clone_mutable()))
         {
-            println!("mutation {} survived _ {}", 3usize, " LOD, LOD,");
+            println!("mutation {} survived _ {}", 3usize, " COD, LOD,");
         } else {
-            println!("mutation {} killed _ {}", 3usize, " LOD, LOD,");
+            println!("mutation {} killed _ {}", 3usize, " COD, LOD,");
             score += 1f64;
         }
         println!("score {}", (score / 4f64) * 100f64);
         assert!((score / 4f64) * 100f64 >= 100f64)
     }
     fn deletion_demo_0(a: bool, b: bool) -> bool {
-        (b && b) || (a && a)
+        (b && b) || (a && b)
     }
     fn deletion_demo_1(a: bool, b: bool) -> bool {
-        (b && b) || (!a && !a)
+        (a && b) || (b && b)
     }
     fn deletion_demo_2(a: bool, b: bool) -> bool {
-        (b && b) || (!a && !a)
+        (a && b) || (!a && !b)
     }
     fn deletion_demo_3(a: bool, b: bool) -> bool {
-        (a && b) || (!a && !b)
+        (a && a) || (b && b)
     }
 }

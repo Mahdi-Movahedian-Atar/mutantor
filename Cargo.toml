@@ -1,6 +1,6 @@
 [package]
 name = "mutantor"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 license = "Apache-2.0"
 description = "Core mutation testing engine"
@@ -15,8 +15,8 @@ default = []
 ai = ["default"]
 
 [dependencies]
-mutantor-macro = { path = "mutantor-macro",version = "0.1.0" }
-mutantor-core = { path = "mutantor-core",version = "0.1.0" }
+mutantor-macro = { path = "mutantor-macro",version = "0.1.1" }
+mutantor-core = { path = "mutantor-core",version = "0.1.1" }
 
 [workspace]
 members = ["example_crate","mutantor-core","mutantor-macro"]

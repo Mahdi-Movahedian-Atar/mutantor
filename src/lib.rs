@@ -3,8 +3,10 @@ pub use mutantor_core::rand;
 #[cfg(feature = "default")]
 pub use mutantor_core::rand_val::*;
 #[cfg(feature = "default")]
-pub use mutantor_core::flag_macros;
-#[cfg(feature = "default")]
 pub use mutantor_macro::generate_mutants;
+#[cfg(feature = "default")]
+pub use mutantor_macro::sdl;
+#[cfg(feature = "default")]
+pub use mutantor_macro::ignore;
 #[cfg(feature = "ai")]
 pub use mutantor_macro::generate_mutants_ai;

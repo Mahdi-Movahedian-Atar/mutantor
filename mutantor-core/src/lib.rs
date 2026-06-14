@@ -51,14 +51,6 @@
 //!
 //! The crate re-exports the `rand` crate for use by generated code.
 
-/// Mutation-testing helper macros.
-///
-/// Contains marker macros such as:
-///
-/// - `sdl!`
-/// - `ignore!`
-pub mod flag_macros;
-
 /// Internal AST mutation visitor implementation.
 ///
 /// Traverses syntax trees and applies mutation operators.

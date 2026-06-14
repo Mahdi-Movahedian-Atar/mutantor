@@ -21,49 +21,49 @@ mod insertion_demo_test {
         if (insertion_demo(a.clone_mutable(), b.clone_mutable())
             == insertion_demo_0(a.clone_mutable(), b.clone_mutable()))
         {
-            println!("mutation {} survived _ {}", 0usize, " LOI, AOI,");
+            println!("mutation {} survived _ {}", 0usize, " AOI, COI,");
         } else {
-            println!("mutation {} killed _ {}", 0usize, " LOI, AOI,");
+            println!("mutation {} killed _ {}", 0usize, " AOI, COI,");
             score += 1f64;
         }
         if (insertion_demo(a.clone_mutable(), b.clone_mutable())
             == insertion_demo_1(a.clone_mutable(), b.clone_mutable()))
         {
-            println!("mutation {} survived _ {}", 1usize, " COI, COI,");
+            println!("mutation {} survived _ {}", 1usize, " COI, AOI,");
         } else {
-            println!("mutation {} killed _ {}", 1usize, " COI, COI,");
+            println!("mutation {} killed _ {}", 1usize, " COI, AOI,");
             score += 1f64;
         }
         if (insertion_demo(a.clone_mutable(), b.clone_mutable())
             == insertion_demo_2(a.clone_mutable(), b.clone_mutable()))
         {
-            println!("mutation {} survived _ {}", 2usize, " LOI, COI,");
+            println!("mutation {} survived _ {}", 2usize, " LOI, LOI,");
         } else {
-            println!("mutation {} killed _ {}", 2usize, " LOI, COI,");
+            println!("mutation {} killed _ {}", 2usize, " LOI, LOI,");
             score += 1f64;
         }
         if (insertion_demo(a.clone_mutable(), b.clone_mutable())
             == insertion_demo_3(a.clone_mutable(), b.clone_mutable()))
         {
-            println!("mutation {} survived _ {}", 3usize, " COI, LOI,");
+            println!("mutation {} survived _ {}", 3usize, " LOI, COI,");
         } else {
-            println!("mutation {} killed _ {}", 3usize, " COI, LOI,");
+            println!("mutation {} killed _ {}", 3usize, " LOI, COI,");
             score += 1f64;
         }
         if (insertion_demo(a.clone_mutable(), b.clone_mutable())
             == insertion_demo_4(a.clone_mutable(), b.clone_mutable()))
         {
-            println!("mutation {} survived _ {}", 4usize, " AOI, LOI,");
+            println!("mutation {} survived _ {}", 4usize, " COI, AOI,");
         } else {
-            println!("mutation {} killed _ {}", 4usize, " AOI, LOI,");
+            println!("mutation {} killed _ {}", 4usize, " COI, AOI,");
             score += 1f64;
         }
         if (insertion_demo(a.clone_mutable(), b.clone_mutable())
             == insertion_demo_5(a.clone_mutable(), b.clone_mutable()))
         {
-            println!("mutation {} survived _ {}", 5usize, " AOI, AOI,");
+            println!("mutation {} survived _ {}", 5usize, " AOI, LOI,");
         } else {
-            println!("mutation {} killed _ {}", 5usize, " AOI, AOI,");
+            println!("mutation {} killed _ {}", 5usize, " AOI, LOI,");
             score += 1f64;
         }
         println!("score {}", (score / 6f64) * 100f64);

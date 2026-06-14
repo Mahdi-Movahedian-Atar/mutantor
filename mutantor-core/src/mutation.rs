@@ -551,7 +551,7 @@ impl<'a> VisitMut for Mutation<'a> {
     ///
     /// Only macros whose path is exactly `sdl` are modified.
     fn visit_macro_mut(&mut self, mac: &mut Macro) {
-        if self.sd_operators && self.rng.random_bool(self.mutation_chance.clone() * 0.5) {
+        if self.sd_operators && self.rng.random_bool(self.mutation_chance.clone()) {
             if mac.path.is_ident("sdl") {
                 *mac = parse_quote!(sdl!());
                 return;

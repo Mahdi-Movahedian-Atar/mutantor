@@ -1,18 +1,18 @@
 use mutantor::*;
+use mutantor::sdl;
 
 
 fn main() {
     println!("Hello, world!");
 }
 
-#[generate_mutants(IPVR, IPEX, IMCD,AOR,ROR,COR,LOR,SOR,SDL, path = "a.rs" , acc = 100.0, c_count = 2,m_count = 2)]
+#[generate_mutants(SDL, path = "a.rs" , acc = 100.0, c_count = 2,m_count = 2, chance = 1.0)]
 fn mutation_demo(a: i32, b: i32, c: bool, d: bool) -> i32 {
     let mut x = a + b;
     x = x - 1;
     x = x * 2;
     x = x / 2;
-    x = x % 7;
-
+    sdl!(x = x % 7);
 
     if (x > 10 && c) || (x <= 100 && d) {
         x += 1;
