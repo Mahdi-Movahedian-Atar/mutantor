@@ -50,6 +50,7 @@ If your tests still pass, the mutant **survived**, indicating missing test cover
 - Input parameter mutations
 - Randomized test input generation
 - Configurable mutation scoring
+- ACOC based input
 - AI-assisted mutation planning (optional)
 
 ---
@@ -58,14 +59,14 @@ If your tests still pass, the mutant **survived**, indicating missing test cover
 
 ```toml
 [dependencies]
-mutantor = "0.1"
+mutantor = "0.2"
 ```
 
 Enable AI-assisted mutation planning:
 
 ```toml
 [dependencies]
-mutantor = { version = "0.1", features = ["ai"] }
+mutantor = { version = "0.2", features = ["ai"] }
 ```
 
 ---
@@ -176,13 +177,14 @@ Mutantor accepts configuration directly through the attribute macro.
 
 ### Options
 
-| Option | Description | Default |
-|----------|-------------|----------|
-| path | Write generated code to a file | None |
-| m_count | Mutations per operator | 1 |
-| c_count | Mutation combinations | 3 |
-| chance | Mutation probability | 0.75 |
-| acc | Required mutation score (%) | 75 |
+| Option   | Description                    | Default |
+|----------|--------------------------------|---------|
+| path     | Write generated code to a file | None    |
+| m_count  | Mutations per operator         | 1       |
+| c_count  | Mutation combinations          | 3       |
+| chance   | Mutation probability           | 0.75    |
+| acc      | Required mutation score (%)    | 75      |
+| use_acoc | Use ACOC based inputs          | false   |
 
 ---
 

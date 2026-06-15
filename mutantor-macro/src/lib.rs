@@ -49,15 +49,15 @@
 //! ```
 mod ai;
 
+use crate::ai::{CodeFeatures, ask_llm, build_prompt};
 use mutantor_core::mutation_builder::MutationBuilder;
-use mutantor_core::mutation_collector:: mutation_collector;
+use mutantor_core::mutation_collector::mutation_collector;
+use mutantor_core::mutation_operators::MutationOperators;
 use quote::quote;
 use std::fs;
 use std::process::Command;
 use std::str::FromStr;
 use syn::{ItemFn, parse_macro_input};
-use mutantor_core::mutation_operators::MutationOperators;
-use crate::ai::{ask_llm, build_prompt, CodeFeatures};
 
 /// Generates mutation tests using an explicitly configured
 /// mutation strategy.
@@ -79,12 +79,12 @@ pub fn generate_mutants(
         #test
     };
 
-
     if let Some(path) = data.path {
         fs::write(&path, out.to_string().as_str()).expect("cannot write file");
         Command::new("rustfmt")
             .arg(path)
-            .status().expect("cannot format file");
+            .status()
+            .expect("cannot format file");
     };
 
     out.into()
@@ -113,7 +113,11 @@ pub fn generate_mutants_ai(
     data.acceptable_score = plan.acceptable_score;
     data.mutation_count = plan.mutation_count;
     data.combination_count = plan.combination_count;
-    data.operators = plan.operators.iter().map(|x| MutationOperators::from_str(x.as_str()).expect("Bad AI Input")).collect();
+    data.operators = plan
+        .operators
+        .iter()
+        .map(|x| MutationOperators::from_str(x.as_str()).expect("Bad AI Input"))
+        .collect();
 
     let test = mutation_collector(&data, &func);
 
@@ -126,7 +130,8 @@ pub fn generate_mutants_ai(
         fs::write(&path, out.to_string().as_str()).expect("cannot write file");
         Command::new("rustfmt")
             .arg(path)
-            .status().expect("cannot format file");
+            .status()
+            .expect("cannot format file");
     };
 
     out.into()
@@ -170,9 +175,7 @@ pub fn generate_mutants_ai(
 ///
 /// Used by the `SDL` (Statement Deletion) mutation operator.
 #[proc_macro]
-pub fn sdl(
-    item: proc_macro::TokenStream,
-) -> proc_macro::TokenStream {
+pub fn sdl(item: proc_macro::TokenStream) -> proc_macro::TokenStream {
     item
 }
 /// Marks a statement as excluded from mutation testing.
@@ -210,8 +213,6 @@ pub fn sdl(
 /// depends on mutation visitors or tooling that recognizes the
 /// `ignore!` marker.
 #[proc_macro]
-pub fn ignore(
-    item: proc_macro::TokenStream,
-) -> proc_macro::TokenStream {
+pub fn ignore(item: proc_macro::TokenStream) -> proc_macro::TokenStream {
     item
 }

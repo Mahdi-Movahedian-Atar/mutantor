@@ -2,7 +2,7 @@ use crate::mutation_operators::MutationOperators;
 use rand::RngExt;
 use rand::prelude::ThreadRng;
 use syn::visit_mut::VisitMut;
-use syn::{BinOp, ExprBinary, Macro, parse_quote};
+use syn::{BinOp, ExprBinary, Macro, parse_quote, ExprIf};
 /// Identifies the operator form of a binary expression.
 ///
 /// Some mutation operators behave differently depending on whether the

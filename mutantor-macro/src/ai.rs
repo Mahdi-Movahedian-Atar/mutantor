@@ -1,7 +1,7 @@
-use std::fs;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
-use syn::{visit, visit::Visit, BinOp, ItemFn};
+use std::fs;
+use syn::{BinOp, ItemFn, visit, visit::Visit};
 
 /// Configuration loaded from `mutant.toml`.
 ///
@@ -115,8 +115,7 @@ impl CodeFeatures {
 
         visitor.features.function_count = 1;
 
-        visitor.features.parameter_count =
-            func.sig.inputs.len();
+        visitor.features.parameter_count = func.sig.inputs.len();
 
         visitor.visit_item_fn(func);
 
@@ -131,17 +130,10 @@ struct FeatureVisitor {
 }
 
 impl<'ast> Visit<'ast> for FeatureVisitor {
-    fn visit_expr_binary(
-        &mut self,
-        node: &'ast syn::ExprBinary,
-    ) {
+    fn visit_expr_binary(&mut self, node: &'ast syn::ExprBinary) {
         match &node.op {
             // Arithmetic
-            BinOp::Add(_)
-            | BinOp::Sub(_)
-            | BinOp::Mul(_)
-            | BinOp::Div(_)
-            | BinOp::Rem(_) => {
+            BinOp::Add(_) | BinOp::Sub(_) | BinOp::Mul(_) | BinOp::Div(_) | BinOp::Rem(_) => {
                 self.features.arithmetic_ops += 1;
             }
 
@@ -156,8 +148,7 @@ impl<'ast> Visit<'ast> for FeatureVisitor {
             }
 
             // Logical
-            BinOp::And(_)
-            | BinOp::Or(_) => {
+            BinOp::And(_) | BinOp::Or(_) => {
                 self.features.logical_ops += 1;
             }
 
@@ -176,10 +167,7 @@ impl<'ast> Visit<'ast> for FeatureVisitor {
         visit::visit_expr_binary(self, node);
     }
 
-    fn visit_expr_call(
-        &mut self,
-        node: &'ast syn::ExprCall,
-    ) {
+    fn visit_expr_call(&mut self, node: &'ast syn::ExprCall) {
         self.features.function_count += 1;
 
         visit::visit_expr_call(self, node);
@@ -314,37 +302,36 @@ pub fn build_prompt(features: &CodeFeatures) -> String {
 ///
 /// println!("{:?}", plan);
 /// ```
-pub fn ask_llm(
-    prompt: String,
-) -> MutationPlan{
+pub fn ask_llm(prompt: String) -> MutationPlan {
     let rt = tokio::runtime::Runtime::new().unwrap();
     let client = Client::new();
 
     let config = load_config().expect("Error loading config");
 
-    let response = rt.block_on(async {client
-        .post("https://openrouter.ai/api/v1/chat/completions")
-        .bearer_auth(config.api_key)
-        .json(&serde_json::json!({
-            "model": "deepseek",
-            "messages": [
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ]
-        }))
-        .send()
-        .await.expect("Failed to send request")});
+    let response = rt.block_on(async {
+        client
+            .post("https://openrouter.ai/api/v1/chat/completions")
+            .bearer_auth(config.api_key)
+            .json(&serde_json::json!({
+                "model": "deepseek",
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ]
+            }))
+            .send()
+            .await
+            .expect("Failed to send request")
+    });
 
-    let body: serde_json::Value = rt.block_on(async { response.json().await.expect("failed to parse response")});
+    let body: serde_json::Value =
+        rt.block_on(async { response.json().await.expect("failed to parse response") });
 
-    let content = body["choices"][0]["message"]["content"]
-        .as_str()
-        .unwrap();
+    let content = body["choices"][0]["message"]["content"].as_str().unwrap();
 
-    let plan: MutationPlan =
-        serde_json::from_str(content).expect("failed to parse response");
+    let plan: MutationPlan = serde_json::from_str(content).expect("failed to parse response");
 
     plan
 }

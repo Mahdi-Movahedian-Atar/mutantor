@@ -1,6 +1,6 @@
 use crate::mutation::Mutation;
 use crate::mutation_builder::MutationBuilder;
-use crate::mutation_input::{InputType, mutation_input};
+use crate::mutation_input::{InputType, mutation_input, AcoCollector};
 use crate::mutation_operators::MutationOperators;
 use proc_macro2::TokenStream;
 use quote::{ToTokens, quote};
@@ -8,6 +8,8 @@ use rand::RngExt;
 use rand::prelude::SliceRandom;
 use syn::visit_mut::VisitMut;
 use syn::{FnArg, ItemFn, Pat, PatType, Type};
+use syn::visit::Visit;
+
 /// Collects generated mutant functions.
 ///
 /// This structure is used during procedural macro expansion to store
@@ -250,12 +252,33 @@ pub fn mutation_collector(mutation_data: &MutationBuilder, func: &ItemFn) -> Tok
             other => (name, InputType::Own, other.to_token_stream()),
         } ;
 
-        final_code = quote! {
+        variables.push((name, rf, ty))
+    }
+
+    if mutation_data.use_acoc{
+        let mut acoc_data = AcoCollector {
+            variables: &variables.iter().map(|x|(x.0,x.0.to_token_stream().to_string())).collect(),
+            acoc_inputs: Default::default(),
+        };
+        acoc_data.visit_block(& func.block);
+        for (name, _, ty) in &variables {
+            let code = acoc_data.acoc_inputs.get(name).cloned().unwrap_or_else(|| { TokenStream::new() });
+            final_code = quote! {
+                #final_code
+                let mut #name = #ty::acoc(&[#code],&mut rng);
+            };
+        }
+
+    }
+    else {
+        for (name, _, ty) in &variables {
+            final_code = quote! {
             #final_code
             let mut #name = #ty::new_mutable(&mut rng);
         };
-        variables.push((name, rf, ty))
+        }
     }
+
 
     let main_function_call =
         mutation_input(&variables, &0.0, &Vec::new(), &func.sig.ident, &mut rng);
@@ -306,6 +329,7 @@ pub fn mutation_collector(mutation_data: &MutationBuilder, func: &ItemFn) -> Tok
                     println!("mutation {} killed _ {}",#i, #mutation_names);
                     score += 1f64;
                 }
+            score_max += 1f64;
             };
             continue;
         }
@@ -324,6 +348,7 @@ pub fn mutation_collector(mutation_data: &MutationBuilder, func: &ItemFn) -> Tok
                 println!("mutation {} killed _ {}",#i, #mutation_names);
                 score += 1f64;
             }
+            score_max += 1f64;
         };
 
         let mut new_func = func.clone();
@@ -350,8 +375,18 @@ pub fn mutation_collector(mutation_data: &MutationBuilder, func: &ItemFn) -> Tok
         &format!("{}_test", func.sig.ident,),
         proc_macro2::Span::call_site(),
     );
-    let mutations = mutation_data.mutation_count as f64 * mutation_data.operators.len() as f64;
     let acceptable = mutation_data.acceptable_score;
+
+    if mutation_data.use_acoc{
+        for (name, _, _) in variables {
+            mutation_call = quote! {
+                for #name in &#name {
+                    #mutation_call
+                }
+            }
+        }
+    }
+
     quote! {
         #[cfg(test)]
         #[allow(unused)]
@@ -362,11 +397,12 @@ pub fn mutation_collector(mutation_data: &MutationBuilder, func: &ItemFn) -> Tok
             #[test]
             fn test(){
                 let mut  score = 0f64;
+                let mut  score_max = 0f64;
                 let mut rng = rand::rng();
                 #final_code
                 #mutation_call
-                println!("score {}", (score/#mutations) * 100f64);
-                assert!((score/#mutations) * 100f64 >= #acceptable)
+                println!("score {}", (score/score_max) * 100f64);
+                assert!((score/score_max) * 100f64 >= #acceptable)
             }
             #mutation_functions
         }

@@ -72,6 +72,8 @@ pub struct MutationBuilder {
     ///
     /// Default: `75.0`
     pub acceptable_score: f64,
+
+    pub use_acoc: bool,
 }
 
 /// Parses the configuration supplied to the mutation-testing
@@ -184,6 +186,9 @@ impl Parse for MutationBuilder {
         let mut combination_count = 3;
         let mut mutation_chance = 0.75;
         let mut acceptable_score = 75.0;
+
+        let mut use_acoc = false;
+
         while !input.is_empty() {
             let ident: Ident = input.parse()?;
             let op = match ident.to_string().as_str() {
@@ -194,6 +199,13 @@ impl Parse for MutationBuilder {
 
                     path = Some(Path::new(&value.value()).to_path_buf());
 
+                    if input.peek(Token![,]) {
+                        input.parse::<Token![,]>()?;
+                    }
+                    continue;
+                }
+                "use_acoc"=>{
+                    use_acoc = true;
                     if input.peek(Token![,]) {
                         input.parse::<Token![,]>()?;
                     }
@@ -276,6 +288,7 @@ impl Parse for MutationBuilder {
         }
 
         Ok(Self {
+            use_acoc,
             operators,
             path,
             mutation_count,
