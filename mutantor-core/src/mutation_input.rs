@@ -1,12 +1,11 @@
-use std::collections::{HashMap, HashSet};
 use crate::mutation_operators::MutationOperators;
 use proc_macro2::{Ident, TokenStream};
-use quote::{quote, ToTokens};
+use quote::{ToTokens, quote};
 use rand::RngExt;
 use rand::rngs::ThreadRng;
-use syn::{BinOp, Expr, ExprBinary, ExprLit};
+use std::collections::{HashMap};
 use syn::visit::Visit;
-use syn::visit_mut::VisitMut;
+use syn::{BinOp, Expr, ExprBinary};
 
 /// Describes how a function parameter is passed to the target function.
 pub(crate) enum InputType {
@@ -156,15 +155,9 @@ pub fn mutation_input(
         };
 
         match i.1 {
-            InputType::Own => {
-                final_in = quote! {#final_in #inp.clone_mutable(),}
-            }
-            InputType::Ref => {
-                final_in = quote! {#final_in & #inp,}
-            }
-            InputType::MutRef => {
-                final_in = quote! {#final_in &mut #inp.clone_mutable(),}
-            }
+            InputType::Own => final_in = quote! {#final_in #inp.clone_mutable(),},
+            InputType::Ref => final_in = quote! {#final_in & #inp,},
+            InputType::MutRef => final_in = quote! {#final_in &mut #inp.clone_mutable(),},
         }
     }
 
@@ -232,7 +225,7 @@ pub struct AcoCollector<'a> {
     pub acoc_inputs: HashMap<&'a Ident, TokenStream>,
 }
 impl<'a> Visit<'_> for AcoCollector<'a> {
-    /// Visits binary expressions and collects literals used in
+    /// Visits binary expressions and collects literals and expressions wrapped in "acoc!" macro used in
     /// comparison operations.
     ///
     /// Supported comparison operators:
@@ -246,7 +239,7 @@ impl<'a> Visit<'_> for AcoCollector<'a> {
     ///
     /// # Collection Rules
     ///
-    /// If a monitored variable is compared against a literal:
+    /// If a monitored variable is compared against a literal or expressions wrapped in "acoc!" macro:
     ///
     /// ```rust,ignore
     /// x > 10
@@ -282,45 +275,64 @@ impl<'a> Visit<'_> for AcoCollector<'a> {
     ///
     /// # Notes
     ///
-    /// Only literal expressions (`Expr::Lit`) are collected.
+    /// Only literal expressions (`Expr::Lit`) or expressions wrapped in "acoc!" macro (`Expr::Macro`) are collected.
     /// Comparisons involving variables, function calls, or complex
-    /// expressions are ignored.
-    fn visit_expr_binary(&mut self, node: & ExprBinary) {
+    /// other expressions are ignored.
+    fn visit_expr_binary(&mut self, node: &ExprBinary) {
         match node.op {
-            BinOp::Eq(_) |
-            BinOp::Lt(_) |
-            BinOp::Le(_) |
-            BinOp::Ne(_) |
-            BinOp::Ge(_) |
-            BinOp::Gt(_) => {
-                for i in self.variables{
-                     if node.right.to_token_stream().to_string() == i.1{
+            BinOp::Eq(_)
+            | BinOp::Lt(_)
+            | BinOp::Le(_)
+            | BinOp::Ne(_)
+            | BinOp::Ge(_)
+            | BinOp::Gt(_) => {
+                for i in self.variables {
+                    if node.right.to_token_stream().to_string() == i.1 {
+                        if let Expr::Macro(t) = &*node.left {
+                            if t.mac.path.to_token_stream().to_string() == "acoc" {
+                                let exp = t.mac.tokens.to_token_stream();
+                                if let Some(t) = self.acoc_inputs.get_mut(i.0) {
+                                    *t = quote! {#t, #exp};
+                                } else {
+                                    self.acoc_inputs.insert(i.0, exp);
+                                }
+                            }
+                        }
                         if let Expr::Lit(_) = &*node.left {
                             let lit = node.left.to_token_stream();
-                            if let Some(t) = self.acoc_inputs.get_mut(i.0){
+                            if let Some(t) = self.acoc_inputs.get_mut(i.0) {
                                 *t = quote! {#t, #lit};
-                            }else {
-                                self.acoc_inputs.insert(i.0,lit);
+                            } else {
+                                self.acoc_inputs.insert(i.0, lit);
                             }
                         }
                         continue;
-                    }
-                    else if node.left.to_token_stream().to_string() == i.1{
+                    } else if node.left.to_token_stream().to_string() == i.1 {
+                        if let Expr::Macro(t) = &*node.right {
+                            if t.mac.path.to_token_stream().to_string() == "acoc" {
+                                let exp = t.mac.tokens.to_token_stream();
+                                if let Some(t) = self.acoc_inputs.get_mut(i.0) {
+                                    *t = quote! {#t, #exp};
+                                } else {
+                                    self.acoc_inputs.insert(i.0, exp);
+                                }
+                            }
+                        }
                         if let Expr::Lit(_) = &*node.right {
                             let lit = node.right.to_token_stream();
-                            if let Some(t) = self.acoc_inputs.get_mut(i.0){
+                            if let Some(t) = self.acoc_inputs.get_mut(i.0) {
                                 *t = quote! {#t, #lit};
-                            }else {
-                                self.acoc_inputs.insert(i.0,lit);
+                            } else {
+                                self.acoc_inputs.insert(i.0, lit);
                             }
                         }
                         continue;
                     };
                 }
-            },
-            _ => {}}
+            }
+            _ => {}
+        }
 
         syn::visit::visit_expr_binary(self, node)
-        }
-
-        }
+    }
+}

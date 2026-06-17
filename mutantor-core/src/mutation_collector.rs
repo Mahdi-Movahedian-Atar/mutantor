@@ -1,14 +1,14 @@
 use crate::mutation::Mutation;
 use crate::mutation_builder::MutationBuilder;
-use crate::mutation_input::{InputType, mutation_input, AcoCollector};
+use crate::mutation_input::{AcoCollector, InputType, mutation_input};
 use crate::mutation_operators::MutationOperators;
 use proc_macro2::TokenStream;
 use quote::{ToTokens, quote};
 use rand::RngExt;
 use rand::prelude::SliceRandom;
+use syn::visit::Visit;
 use syn::visit_mut::VisitMut;
 use syn::{FnArg, ItemFn, Pat, PatType, Type};
-use syn::visit::Visit;
 
 /// Collects generated mutant functions.
 ///
@@ -217,9 +217,9 @@ pub fn mutation_collector(mutation_data: &MutationBuilder, func: &ItemFn) -> Tok
 
     let mut variables = Vec::new();
 
-    for _ in 0..mutation_data.combination_count  {
+    for _ in 0..mutation_data.combination_count {
         operators.push(Vec::new());
-        for _ in 0..mutation_data.mutation_count  {
+        for _ in 0..mutation_data.mutation_count {
             operators
                 .last_mut()
                 .unwrap()
@@ -250,40 +250,44 @@ pub fn mutation_collector(mutation_data: &MutationBuilder, func: &ItemFn) -> Tok
                 r.elem.to_token_stream(),
             ),
             other => (name, InputType::Own, other.to_token_stream()),
-        } ;
+        };
 
         variables.push((name, rf, ty))
     }
 
-    if mutation_data.use_acoc{
+    if mutation_data.use_acoc {
         let mut acoc_data = AcoCollector {
-            variables: &variables.iter().map(|x|(x.0,x.0.to_token_stream().to_string())).collect(),
+            variables: &variables
+                .iter()
+                .map(|x| (x.0, x.0.to_token_stream().to_string()))
+                .collect(),
             acoc_inputs: Default::default(),
         };
-        acoc_data.visit_block(& func.block);
+        acoc_data.visit_block(&func.block);
         for (name, _, ty) in &variables {
-            let code = acoc_data.acoc_inputs.get(name).cloned().unwrap_or_else(|| { TokenStream::new() });
+            let code = acoc_data
+                .acoc_inputs
+                .get(name)
+                .cloned()
+                .unwrap_or_else(|| TokenStream::new());
             final_code = quote! {
                 #final_code
                 let mut #name = #ty::acoc(&[#code],&mut rng);
             };
         }
-
-    }
-    else {
+    } else {
         for (name, _, ty) in &variables {
             final_code = quote! {
-            #final_code
-            let mut #name = #ty::new_mutable(&mut rng);
-        };
+                #final_code
+                let mut #name = #ty::new_mutable(&mut rng);
+            };
         }
     }
-
 
     let main_function_call =
         mutation_input(&variables, &0.0, &Vec::new(), &func.sig.ident, &mut rng);
 
-    for i in 0..(mutation_data.mutation_count * mutation_data.operators.len())  {
+    for i in 0..(mutation_data.mutation_count * mutation_data.operators.len()) {
         let new_function_name = format!("{}_{}", func.sig.ident, i);
         let new_function_ident = syn::Ident::new(&new_function_name, func.sig.ident.span());
         let mut mutation_names = String::new();
@@ -297,7 +301,7 @@ pub fn mutation_collector(mutation_data: &MutationBuilder, func: &ItemFn) -> Tok
         let mut so_operators: bool = false;
         let mut imcd_operators: bool = false;
         let mut imcd_chance = (mutation_data.combination_count + 1) as f64;
-        for j in 0..mutation_data.combination_count  {
+        for j in 0..mutation_data.combination_count {
             match operators[j][i] {
                 MutationOperators::AOD => ao_operators.push(MutationOperators::AOD),
                 MutationOperators::AOI => ao_operators.push(MutationOperators::AOI),
@@ -318,7 +322,7 @@ pub fn mutation_collector(mutation_data: &MutationBuilder, func: &ItemFn) -> Tok
                     imcd_chance -= 1f64;
                 }
             };
-            mutation_names = format!("{} {},",mutation_names,operators[j][i]);
+            mutation_names = format!("{} {},", mutation_names, operators[j][i]);
         }
         if imcd_operators && rng.random_bool(mutation_data.mutation_chance / imcd_chance) {
             mutation_call = quote! {
@@ -377,7 +381,7 @@ pub fn mutation_collector(mutation_data: &MutationBuilder, func: &ItemFn) -> Tok
     );
     let acceptable = mutation_data.acceptable_score;
 
-    if mutation_data.use_acoc{
+    if mutation_data.use_acoc {
         for (name, _, _) in variables {
             mutation_call = quote! {
                 for #name in &#name {

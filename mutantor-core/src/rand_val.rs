@@ -71,7 +71,7 @@ pub trait Mutable: Clone {
     ///
     /// Custom implementations may use the supplied `input` slice to
     /// generate context-aware mutations instead of purely random values.
-    fn acoc(input:&[Self],rng: &mut ThreadRng)->Vec<Self>{
+    fn acoc(input: &[Self], rng: &mut ThreadRng) -> Vec<Self> {
         vec![Self::new_mutable(rng)]
     }
 }
@@ -104,19 +104,15 @@ macro_rules! impl_mutable_primitive {
     };
 }
 
-impl_mutable_primitive!(
-    u8, u16, u32, u64,
-    i8, i16, i32, i64,
-    f32, f64
-);
+impl_mutable_primitive!(u8, u16, u32, u64, i8, i16, i32, i64, f32, f64);
 
 /// Generates a random `usize` in the range `1..10`.
 impl Mutable for usize {
     fn new_mutable(rng: &mut ThreadRng) -> Self {
         rng.random_range(1..10) as usize
     }
-    fn acoc(input:&[Self],rng: &mut ThreadRng)->Vec<Self>{
-        if input.len() == 0{
+    fn acoc(input: &[Self], rng: &mut ThreadRng) -> Vec<Self> {
+        if input.len() == 0 {
             return vec![Self::new_mutable(rng)];
         }
         let mut out = Vec::from(input);
@@ -135,8 +131,8 @@ impl Mutable for isize {
     fn new_mutable(rng: &mut ThreadRng) -> Self {
         rng.random_range(-10..10) as isize
     }
-    fn acoc(input:&[Self],rng: &mut ThreadRng)->Vec<Self>{
-        if input.len() == 0{
+    fn acoc(input: &[Self], rng: &mut ThreadRng) -> Vec<Self> {
+        if input.len() == 0 {
             return vec![Self::new_mutable(rng)];
         }
         let mut out = Vec::from(input);
@@ -155,8 +151,8 @@ impl Mutable for bool {
     fn new_mutable(rng: &mut ThreadRng) -> Self {
         rng.random()
     }
-    fn acoc(input:&[Self],rng: &mut ThreadRng)->Vec<Self>{
-        if input.len() == 0{
+    fn acoc(input: &[Self], rng: &mut ThreadRng) -> Vec<Self> {
+        if input.len() == 0 {
             return vec![Self::new_mutable(rng)];
         }
         let mut out = Vec::from(input);

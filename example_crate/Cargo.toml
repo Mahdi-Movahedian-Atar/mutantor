@@ -4,4 +4,4 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-mutantor = { version = "0.1.0" , path = ".." }
+mutantor = { version = "0.2.0" , path = ".." }

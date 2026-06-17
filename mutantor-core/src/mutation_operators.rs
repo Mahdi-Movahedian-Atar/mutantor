@@ -112,10 +112,7 @@ pub enum MutationOperators {
 /// assert_eq!(op.to_string(), "AOR");
 /// ```
 impl Display for MutationOperators {
-    fn fmt(
-        &self,
-        f: &mut Formatter<'_>,
-    ) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let name = match self {
             MutationOperators::AOD => "AOD",
             MutationOperators::AOI => "AOI",

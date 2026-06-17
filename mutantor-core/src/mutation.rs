@@ -2,7 +2,7 @@ use crate::mutation_operators::MutationOperators;
 use rand::RngExt;
 use rand::prelude::ThreadRng;
 use syn::visit_mut::VisitMut;
-use syn::{BinOp, ExprBinary, Macro, parse_quote, ExprIf};
+use syn::{BinOp, ExprBinary, Macro, parse_quote};
 /// Identifies the operator form of a binary expression.
 ///
 /// Some mutation operators behave differently depending on whether the
@@ -344,7 +344,7 @@ impl<'a> VisitMut for Mutation<'a> {
         match ex_type {
             ExType::AO(t) => {
                 if self.ao_operators.len() != 0 {
-                    match self.ao_operators[self.rng.random_range(0..self.ao_operators.len() )] {
+                    match self.ao_operators[self.rng.random_range(0..self.ao_operators.len())] {
                         MutationOperators::AOD => match t {
                             AT::EQ => {
                                 *node = parse_quote!(#left += 0);
@@ -397,7 +397,7 @@ impl<'a> VisitMut for Mutation<'a> {
             }
             ExType::CO => {
                 if self.co_operators.len() != 0 {
-                    match self.co_operators[self.rng.random_range(0..self.co_operators.len() )] {
+                    match self.co_operators[self.rng.random_range(0..self.co_operators.len())] {
                         MutationOperators::COD => {
                             if self.rng.random_bool(0.5) {
                                 *right = parse_quote!(#left);
@@ -442,7 +442,7 @@ impl<'a> VisitMut for Mutation<'a> {
             }
             ExType::LO(t) => {
                 if self.lo_operators.len() != 0 {
-                    match self.lo_operators[self.rng.random_range(0..self.lo_operators.len() )] {
+                    match self.lo_operators[self.rng.random_range(0..self.lo_operators.len())] {
                         MutationOperators::LOD => match t {
                             AT::EQ => {
                                 *node = parse_quote!(#left += 0);

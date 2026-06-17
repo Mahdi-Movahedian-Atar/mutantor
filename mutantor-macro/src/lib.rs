@@ -216,3 +216,55 @@ pub fn sdl(item: proc_macro::TokenStream) -> proc_macro::TokenStream {
 pub fn ignore(item: proc_macro::TokenStream) -> proc_macro::TokenStream {
     item
 }
+
+/// Marks an expression for ACOC (All-Combinations of Conditions)
+/// mutation testing.
+///
+/// The `acoc!` macro identifies values or expressions that should be
+/// considered when generating condition-combination mutants.
+///
+/// During mutation analysis, Mutantor may use marked values to create
+/// additional test cases that exercise different combinations of
+/// conditional outcomes.
+///
+/// The macro itself performs no transformation and expands to its
+/// input unchanged.
+///
+/// # Example
+///
+/// ```rust,ignore
+/// if age > acoc!(18) && custom_struct >= acoc!(TestInput { a: 10 }) {
+///     grant_access();
+/// }
+/// ```
+///
+/// In this example, the mutation engine may use the marked condition
+/// values when generating combinations of:
+///
+/// ```text
+/// age > 18
+/// custom_struct >= acoc!(TestInput { a: 10 })
+/// ```
+///
+/// to improve coverage of conditional logic.
+///
+/// # Expansion
+///
+/// ```rust,ignore
+/// acoc!(TestInput { a: 10 })
+/// ```
+///
+/// expands to:
+///
+/// ```rust,ignore
+/// TestInput { a: 10 }
+/// ```
+///
+/// # Notes
+///
+/// This macro exists solely as a marker for mutation-analysis tools.
+/// It has no runtime overhead and does not modify program behavior.
+#[proc_macro]
+pub fn acoc(item: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    item
+}
